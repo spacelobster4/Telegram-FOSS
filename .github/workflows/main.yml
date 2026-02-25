@@ -24,7 +24,8 @@ jobs:
       - name: Build Native C/C++ Libraries (FFmpeg, BoringSSL)
         run: |
           cd TMessagesProj/jni
-          export NDK=$ANDROID_NDK_HOME
+          # Принудительно используем старую версию NDK (25-ю), которая совместима со скриптами Telegram
+          export NDK=/usr/local/lib/android/sdk/ndk/25.2.9519653
           export NINJA_PATH=$(which ninja)
           chmod +x *.sh
           if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh; fi
