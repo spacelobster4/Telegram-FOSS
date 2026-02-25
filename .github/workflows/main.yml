@@ -23,11 +23,11 @@ jobs:
           echo "36170084" > API_KEYS
           echo "97dd15ccd7f4fbe1f8f814194f03aef9" >> API_KEYS
 
-      - name: Build FOSS Debug APK
-        run: bash ./gradlew assembleFossDebug
+      - name: Build Debug APK
+        run: bash ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Telegram-Modified-APK
-          path: TMessagesProj/build/outputs/apk/foss/debug/*.apk
+          path: '**/*.apk'
