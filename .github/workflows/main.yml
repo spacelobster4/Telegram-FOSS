@@ -21,12 +21,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y yasm nasm ninja-build
 
-      - name: Build Native C/C++ Libraries (FFmpeg, BoringSSL)
+      - name: Setup exact NDK and Build C/C++ (FFmpeg)
         run: |
-          cd TMessagesProj/jni
-          # Принудительно используем старую версию NDK (25-ю), которая совместима со скриптами Telegram
-          export NDK=/usr/local/lib/android/sdk/ndk/25.2.9519653
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.2.8568313"
+          export NDK=$ANDROID_HOME/ndk/23.2.8568313
           export NINJA_PATH=$(which ninja)
+          cd TMessagesProj/jni
           chmod +x *.sh
           if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh; fi
           if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh; fi
@@ -42,7 +42,9 @@ jobs:
           echo "97dd15ccd7f4fbe1f8f814194f03aef9" >> API_KEYS
 
       - name: Build Debug APK
-        run: bash ./gradlew assembleDebug
+        run: |
+          echo "ndk.dir=$ANDROID_HOME/ndk/23.2.8568313" > local.properties
+          bash ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
