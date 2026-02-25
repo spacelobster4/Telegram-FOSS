@@ -19,7 +19,7 @@ jobs:
       - name: Inject API Keys directly to Gradle
         run: |
           sed -i 's/.*buildConfigField.*APP_ID.*/        buildConfigField "int", "APP_ID", "36170084"/' TMessagesProj/build.gradle
-          sed -i 's/.*buildConfigField.*APP_HASH.*/        buildConfigField "String", "APP_HASH", "\"97dd15ccd7f4fbe1f8f814194f03aef9\""/' TMessagesProj/build.gradle
+          sed -i 's/.*buildConfigField.*APP_HASH.*/        buildConfigField "String", "APP_HASH", "\\\"97dd15ccd7f4fbe1f8f814194f03aef9\\\""/' TMessagesProj/build.gradle
           echo "36170084" > API_KEYS
           echo "97dd15ccd7f4fbe1f8f814194f03aef9" >> API_KEYS
 
