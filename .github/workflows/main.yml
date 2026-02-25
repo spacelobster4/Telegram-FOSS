@@ -16,6 +16,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Create API_KEYS file
+        run: |
+          echo "36170084" > TMessagesProj/API_KEYS
+          echo "97dd15ccd7f4fbe1f8f814194f03aef9" >> TMessagesProj/API_KEYS
+
       - name: Build FOSS Debug APK
         run: bash ./gradlew assembleFossDebug
 
