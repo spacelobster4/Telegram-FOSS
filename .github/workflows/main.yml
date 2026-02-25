@@ -27,6 +27,12 @@ jobs:
           export NDK=$ANDROID_HOME/ndk/23.2.8568313
           export NINJA_PATH=$(which ninja)
           cd TMessagesProj/jni
+          
+          # Жестко вырезаем архитектуру эмуляторов (x86), чтобы скрипт даже не пытался ее собрать
+          sed -i 's/"x86_64"//g' build_ffmpeg_clang.sh || true
+          sed -i 's/"x86"//g' build_ffmpeg_clang.sh || true
+          sed -i 's/x86_64//g' build_ffmpeg_clang.sh || true
+          
           chmod +x *.sh
           if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh; fi
           if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh; fi
@@ -44,7 +50,8 @@ jobs:
       - name: Build Debug APK
         run: |
           echo "ndk.dir=$ANDROID_HOME/ndk/23.2.8568313" > local.properties
-          bash ./gradlew assembleDebug
+          # Командуем Gradle собирать исключительно arm64
+          bash ./gradlew assembleDebug -Pandroid.injected.build.abi=arm64-v8a
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
