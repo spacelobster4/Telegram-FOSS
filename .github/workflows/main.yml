@@ -16,13 +16,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Create API_KEYS file
+      - name: Inject API Keys directly to Gradle
         run: |
-          cat << 'EOF' > TMessagesProj/API_KEYS
-          36170084
-          97dd15ccd7f4fbe1f8f814194f03aef9
-          EOF
-          cp TMessagesProj/API_KEYS API_KEYS
+          sed -i 's/.*buildConfigField.*APP_ID.*/        buildConfigField "int", "APP_ID", "ЦИФРЫ_СЮДА"/' TMessagesProj/build.gradle
+          sed -i 's/.*buildConfigField.*APP_HASH.*/        buildConfigField "String", "APP_HASH", "\"БУКВЫ_СЮДА\""/' TMessagesProj/build.gradle
+          echo "36170084" > API_KEYS
+          echo "97dd15ccd7f4fbe1f8f814194f03aef9" >> API_KEYS
 
       - name: Build FOSS Debug APK
         run: bash ./gradlew assembleFossDebug
