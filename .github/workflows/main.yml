@@ -16,6 +16,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yasm nasm ninja-build
+
+      - name: Build Native C/C++ Libraries (FFmpeg, BoringSSL)
+        run: |
+          cd TMessagesProj/jni
+          export NDK=$ANDROID_NDK_HOME
+          export NINJA_PATH=$(which ninja)
+          chmod +x *.sh
+          if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh; fi
+          if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh; fi
+          if [ -f ./patch_ffmpeg.sh ]; then ./patch_ffmpeg.sh; fi
+          if [ -f ./patch_boringssl.sh ]; then ./patch_boringssl.sh; fi
+          if [ -f ./build_boringssl.sh ]; then ./build_boringssl.sh; fi
+
       - name: Inject API Keys directly to Gradle
         run: |
           sed -i 's/.*buildConfigField.*APP_ID.*/        buildConfigField "int", "APP_ID", "36170084"/' TMessagesProj/build.gradle
