@@ -23,22 +23,19 @@ jobs:
 
       - name: Setup exact NDK and Build C/C++ Libraries
         run: |
-          # Скачиваем ровно ту версию, которую просит Telegram
+          # Качаем правильный NDK
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;21.4.7075529"
           export NDK=$ANDROID_HOME/ndk/21.4.7075529
           export NINJA_PATH=$(which ninja)
           cd TMessagesProj/jni
           
-          # Вырезаем x86
-          sed -i 's/"x86_64"/"arm64-v8a"/g' *.sh || true
-          sed -i 's/"x86"/"arm64-v8a"/g' *.sh || true
-          
+          # Даем права и запускаем оригинальные скрипты как задумали авторы
           chmod +x *.sh
-          if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh arm64-v8a; fi
-          if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh arm64-v8a; fi
+          if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh; fi
+          if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh; fi
           if [ -f ./patch_ffmpeg.sh ]; then ./patch_ffmpeg.sh; fi
           if [ -f ./patch_boringssl.sh ]; then ./patch_boringssl.sh; fi
-          if [ -f ./build_boringssl.sh ]; then ./build_boringssl.sh arm64-v8a; fi
+          if [ -f ./build_boringssl.sh ]; then ./build_boringssl.sh; fi
 
       - name: Inject API Keys directly to Gradle
         run: |
@@ -47,11 +44,10 @@ jobs:
           echo "36170084" > API_KEYS
           echo "97dd15ccd7f4fbe1f8f814194f03aef9" >> API_KEYS
 
-      - name: Build Debug APK
+      - name: Build FOSS Debug APK
         run: |
-          # Передаем правильный путь к нужной версии
           echo "ndk.dir=$ANDROID_HOME/ndk/21.4.7075529" > local.properties
-          bash ./gradlew assembleDebug -Pandroid.injected.build.abi=arm64-v8a
+          bash ./gradlew assembleFossDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
