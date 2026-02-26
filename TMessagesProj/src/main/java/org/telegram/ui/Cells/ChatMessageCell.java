@@ -3333,7 +3333,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 if (timePressed) {
                     timePressed = false;
                     playSoundEffect(SoundEffectConstants.CLICK);
-                    delegate.didPressTime(this);
+                    // delegate.didPressTime(this);
                     invalidate();
                     result = true;
                 }
