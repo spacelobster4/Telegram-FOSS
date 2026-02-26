@@ -21,24 +21,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y yasm nasm ninja-build
 
-      - name: Setup exact NDK and Build C/C++ (FFmpeg)
+      - name: Setup exact NDK and Build C/C++ Libraries
         run: |
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.2.8568313"
           export NDK=$ANDROID_HOME/ndk/23.2.8568313
           export NINJA_PATH=$(which ninja)
           cd TMessagesProj/jni
           
-          # Жестко вырезаем архитектуру эмуляторов (x86), чтобы скрипт даже не пытался ее собрать
-          sed -i 's/"x86_64"//g' build_ffmpeg_clang.sh || true
-          sed -i 's/"x86"//g' build_ffmpeg_clang.sh || true
-          sed -i 's/x86_64//g' build_ffmpeg_clang.sh || true
+          # Тотальная зачистка: меняем x86 на arm64 во всех скриптах, 
+          # чтобы компилятор физически не смог найти старые архитектуры
+          sed -i 's/"x86_64"/"arm64-v8a"/g' *.sh || true
+          sed -i 's/"x86"/"arm64-v8a"/g' *.sh || true
           
           chmod +x *.sh
-          if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh; fi
-          if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh; fi
+          # Напрямую передаем аргумент arm64-v8a, чтобы скрипт сразу собирал то, что нужно
+          if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh arm64-v8a; fi
+          if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh arm64-v8a; fi
           if [ -f ./patch_ffmpeg.sh ]; then ./patch_ffmpeg.sh; fi
           if [ -f ./patch_boringssl.sh ]; then ./patch_boringssl.sh; fi
-          if [ -f ./build_boringssl.sh ]; then ./build_boringssl.sh; fi
+          if [ -f ./build_boringssl.sh ]; then ./build_boringssl.sh arm64-v8a; fi
 
       - name: Inject API Keys directly to Gradle
         run: |
@@ -50,7 +51,7 @@ jobs:
       - name: Build Debug APK
         run: |
           echo "ndk.dir=$ANDROID_HOME/ndk/23.2.8568313" > local.properties
-          # Командуем Gradle собирать исключительно arm64
+          # Еще раз напоминаем Gradle, что нам нужен только мобильный клиент
           bash ./gradlew assembleDebug -Pandroid.injected.build.abi=arm64-v8a
 
       - name: Upload APK
