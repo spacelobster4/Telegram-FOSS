@@ -23,13 +23,11 @@ jobs:
 
       - name: Setup exact NDK and Build C/C++ Libraries
         run: |
-          # Качаем правильный NDK
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;21.4.7075529"
           export NDK=$ANDROID_HOME/ndk/21.4.7075529
           export NINJA_PATH=$(which ninja)
           cd TMessagesProj/jni
           
-          # Даем права и запускаем оригинальные скрипты как задумали авторы
           chmod +x *.sh
           if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh; fi
           if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh; fi
@@ -43,6 +41,12 @@ jobs:
           sed -i 's/.*buildConfigField.*APP_HASH.*/        buildConfigField "String", "APP_HASH", "\\\"97dd15ccd7f4fbe1f8f814194f03aef9\\\""/' TMessagesProj/build.gradle
           echo "36170084" > API_KEYS
           echo "97dd15ccd7f4fbe1f8f814194f03aef9" >> API_KEYS
+
+      - name: FINAL MAGIC (HIDE IMPORTED TEXT & RENAME APP)
+        run: |
+          find TMessagesProj/src/main/res/ -name "strings.xml" -exec sed -i 's/.*name="ImportedMessage".*/    <string name="ImportedMessage"> <\/string>/g' {} +
+          find TMessagesProj/src/main/res/ -name "strings.xml" -exec sed -i 's/.*name="AppName".*/    <string name="AppName">Telegram<\/string>/g' {} +
+          sed -i 's/"Telegram FOSS"/"Telegram"/g' TMessagesProj/build.gradle || true
 
       - name: Build FOSS Debug APK
         run: |
