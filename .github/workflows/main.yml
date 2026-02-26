@@ -23,18 +23,17 @@ jobs:
 
       - name: Setup exact NDK and Build C/C++ Libraries
         run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.2.8568313"
-          export NDK=$ANDROID_HOME/ndk/23.2.8568313
+          # Скачиваем ровно ту версию, которую просит Telegram
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;21.4.7075529"
+          export NDK=$ANDROID_HOME/ndk/21.4.7075529
           export NINJA_PATH=$(which ninja)
           cd TMessagesProj/jni
           
-          # Тотальная зачистка: меняем x86 на arm64 во всех скриптах, 
-          # чтобы компилятор физически не смог найти старые архитектуры
+          # Вырезаем x86
           sed -i 's/"x86_64"/"arm64-v8a"/g' *.sh || true
           sed -i 's/"x86"/"arm64-v8a"/g' *.sh || true
           
           chmod +x *.sh
-          # Напрямую передаем аргумент arm64-v8a, чтобы скрипт сразу собирал то, что нужно
           if [ -f ./build_libvpx_clang.sh ]; then ./build_libvpx_clang.sh arm64-v8a; fi
           if [ -f ./build_ffmpeg_clang.sh ]; then ./build_ffmpeg_clang.sh arm64-v8a; fi
           if [ -f ./patch_ffmpeg.sh ]; then ./patch_ffmpeg.sh; fi
@@ -50,8 +49,8 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          echo "ndk.dir=$ANDROID_HOME/ndk/23.2.8568313" > local.properties
-          # Еще раз напоминаем Gradle, что нам нужен только мобильный клиент
+          # Передаем правильный путь к нужной версии
+          echo "ndk.dir=$ANDROID_HOME/ndk/21.4.7075529" > local.properties
           bash ./gradlew assembleDebug -Pandroid.injected.build.abi=arm64-v8a
 
       - name: Upload APK
